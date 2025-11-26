@@ -1,0 +1,392 @@
+// This script will rebuild the index.html with enhanced examples
+const fs = require('fs');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypergeometric & Poisson Distributions</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>HYPERGEOMETRIC & POISSON DISTRIBUTIONS</h1>
+            <p class="subtitle">Master these concepts with zero jargon!</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#intro">Introduction</a></li>
+                <li><a href="#hypergeometric">Hypergeometric</a></li>
+                <li><a href="#poisson">Poisson</a></li>
+                <li><a href="#quizzes">Practice</a></li>
+                <li><a href="#tricky">Challenge</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Introduction Section -->
+        <section id="intro" class="card">
+            <h2>👋 Welcome to Statistics!</h2>
+            <p>Statistics isn't just about numbers; it's about understanding the world around us. Today, we're going to learn about two very special ways to count probability: the <strong>Hypergeometric Distribution</strong> and the <strong>Poisson Distribution</strong>.</p>
+            
+            <div class="comparison-box">
+                <div class="topic-intro">
+                    <h3>Hypergeometric</h3>
+                    <p>Imagine a deck of cards. You pick some cards and <strong>don't put them back</strong>. That's Hypergeometric!</p>
+                    <span class="tag">Without Replacement</span>
+                </div>
+                <div class="topic-intro">
+                    <h3>Poisson</h3>
+                    <p>Imagine counting how many text messages you get in an hour. It's random, but happens at a certain rate. That's Poisson!</p>
+                    <span class="tag">Rare Events over Time</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hypergeometric Section -->
+        <section id="hypergeometric">
+            <div class="section-header">
+                <h2>Hypergeometric Distribution</h2>
+                <p class="concept-tag">The "No Put-Back" Rule</p>
+            </div>
+
+            <div class="card">
+                <h3>What is it? (Layman's Terms)</h3>
+                <p>The Hypergeometric distribution is what you use when you are picking items from a group <strong>without replacing them</strong>. Because you don't put the item back, the probability changes with every pick.</p>
+                <div class="analogy-box">
+                    <h4>🌟 Real Life Analogy</h4>
+                    <p>Imagine a jar with 10 cookies: 7 Chocolate Chip and 3 Oatmeal. You grab 4 cookies to eat. You obviously can't put a cookie back after you eat it! The chance of getting a Chocolate Chip cookie changes after every cookie you take out.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>The Formula 🧮</h3>
+                <div class="formula-box">
+                    $$ P(X=x) = \\frac{{^K C_x} \\times {^{N-K} C_{n-x}}}{^N C_n} $$
+                </div>
+                <p class="formula-explanation"><strong>What this formula really means (in simple words):</strong></p>
+                <p>It's a fraction. The top part counts "all the ways to get the specific winners you want" AND "all the ways to get the losers you don't want". The bottom part is just "total ways to pick any group of items".</p>
+                
+                <div class="mnemonic-box">
+                    <h4>🧠 Mnemonic to Remember</h4>
+                    <p><strong>"Big N, Big K, little n, little x"</strong></p>
+                    <ul class="params-list">
+                        <li><strong>N (Big N)</strong>: Total population size (The whole jar)</li>
+                        <li><strong>K (Big K)</strong>: Total successes in population (All the Chocolate Chip cookies)</li>
+                        <li><strong>n (little n)</strong>: Sample size (How many you grab)</li>
+                        <li><strong>x (little x)</strong>: Number of successes you want (How many Chocolate Chip cookies you hope to get)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Mind Map</h3>
+                <div class="mindmap">
+                    <div class="mm-center">Hypergeometric</div>
+                    <div class="mm-branch mm-b1">Finite Population</div>
+                    <div class="mm-branch mm-b2">Dependent Trials</div>
+                    <div class="mm-branch mm-b3">Without Replacement</div>
+                    <div class="mm-branch mm-b4">Success / Failure</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Interactive Graph 📊</h3>
+                <p>Adjust the sliders to see how the probability changes!</p>
+                <div class="chart-container">
+                    <canvas id="hyperChart"></canvas>
+                </div>
+                <div class="controls">
+                    <label>Population (N): <span id="valN">20</span> <input type="range" id="paramN" min="10" max="100" value="20"></label>
+                    <label>Successes in Pop (K): <span id="valK">10</span> <input type="range" id="paramK" min="1" max="50" value="10"></label>
+                    <label>Sample Size (n): <span id="valn">5</span> <input type="range" id="paramn" min="1" max="20" value="5"></label>
+                </div>
+                <div id="hyperExplanation" class="graph-explanation">
+                    Change the parameters to see the explanation here.
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Solved Examples</h3>
+                
+                <div class="example">
+                    <h4>Example 1: The Deck of Cards</h4>
+                    <p><strong>Question:</strong> From a standard deck of 52 cards, you draw 5 cards. What is the probability of getting exactly 2 Aces?</p>
+                    
+                    <div class="solution">
+                        <p><strong>Step 1: Identify the parameters</strong></p>
+                        <ul>
+                            <li><strong>N</strong> (Total population) = 52 cards</li>
+                            <li><strong>K</strong> (Total successes in population) = 4 Aces</li>
+                            <li><strong>n</strong> (Sample size) = 5 cards drawn</li>
+                            <li><strong>x</strong> (Desired successes) = 2 Aces</li>
+                        </ul>
+                        
+                        <p><strong>Step 2: Apply the formula</strong></p>
+                        <p>$$ P(X=2) = \\frac{{^4 C_2} \\times {^{48} C_3}}{^{52} C_5} $$</p>
+                        
+                        <p><strong>Step 3: Calculate each combination</strong></p>
+                        <ul>
+                            <li><strong>⁴C₂</strong> (Ways to pick 2 Aces from 4) = 4!/(2!×2!) = (4×3)/(2×1) = <strong>6</strong></li>
+                            <li><strong>⁴⁸C₃</strong> (Ways to pick 3 Non-Aces from 48) = 48!/(3!×45!) = (48×47×46)/(3×2×1) = <strong>17,296</strong></li>
+                            <li><strong>⁵²C₅</strong> (Total ways to pick 5 cards from 52) = 52!/(5!×47!) = <strong>2,598,960</strong></li>
+                        </ul>
+                        
+                        <p><strong>Step 4: Calculate the probability</strong></p>
+                        <p>P(X=2) = (6 × 17,296) / 2,598,960</p>
+                        <p>P(X=2) = 103,776 / 2,598,960</p>
+                        <p>P(X=2) ≈ <strong>0.0399 or 3.99%</strong></p>
+                        
+                        <p><strong>Answer:</strong> There is approximately a <strong>4% chance</strong> of drawing exactly 2 Aces when you draw 5 cards from a standard deck.</p>
+                    </div>
+                </div>
+                
+                <div class="example">
+                    <h4>Example 2: Quality Control</h4>
+                    <p><strong>Question:</strong> A box contains 20 light bulbs, of which 5 are defective. If you randomly select 4 bulbs, what is the probability that exactly 1 is defective?</p>
+                    
+                    <div class="solution">
+                        <p><strong>Step 1: Identify the parameters</strong></p>
+                        <ul>
+                            <li><strong>N</strong> = 20 total bulbs</li>
+                            <li><strong>K</strong> = 5 defective bulbs</li>
+                            <li><strong>n</strong> = 4 bulbs selected</li>
+                            <li><strong>x</strong> = 1 defective bulb desired</li>
+                        </ul>
+                        
+                        <p><strong>Step 2: Apply the formula</strong></p>
+                        <p>$$ P(X=1) = \\frac{{^5 C_1} \\times {^{15} C_3}}{^{20} C_4} $$</p>
+                        
+                        <p><strong>Step 3: Calculate each combination</strong></p>
+                        <ul>
+                            <li><strong>⁵C₁</strong> = 5!/(1!×4!) = <strong>5</strong></li>
+                            <li><strong>¹⁵C₃</strong> = 15!/(3!×12!) = (15×14×13)/(3×2×1) = <strong>455</strong></li>
+                            <li><strong>²⁰C₄</strong> = 20!/(4!×16!) = (20×19×18×17)/(4×3×2×1) = <strong>4,845</strong></li>
+                        </ul>
+                        
+                        <p><strong>Step 4: Calculate the probability</strong></p>
+                        <p>P(X=1) = (5 × 455) / 4,845</p>
+                        <p>P(X=1) = 2,275 / 4,845</p>
+                        <p>P(X=1) ≈ <strong>0.4696 or 46.96%</strong></p>
+                        
+                        <p><strong>Answer:</strong> There is approximately a <strong>47% chance</strong> of getting exactly 1 defective bulb.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card quiz-section">
+                <h3>Hypergeometric Quiz</h3>
+                <div id="quiz-hyper"></div>
+            </div>
+        </section>
+
+        <!-- Poisson Section -->
+        <section id="poisson">
+            <div class="section-header">
+                <h2>Poisson Distribution</h2>
+                <p class="concept-tag">The "Rare Events" Rule</p>
+            </div>
+
+            <div class="card">
+                <h3>What is it? (Layman's Terms)</h3>
+                <p>The Poisson distribution predicts the number of times an event occurs in a fixed interval of time or space. It's used for things that happen independently and at a constant average rate.</p>
+                <div class="analogy-box">
+                    <h4>🌟 Real Life Analogy</h4>
+                    <p>Think of a call center. On average, they might get 5 calls per minute. But in any specific minute, they might get 3, or 8, or 0. Poisson tells us the probability of getting exactly 8 calls when the average is 5.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>The Formula 🧮</h3>
+                <div class="formula-box">
+                    $$ P(X=x) = \\frac{e^{-\\lambda} \\lambda^x}{x!} $$
+                </div>
+                <p class="formula-explanation"><strong>What this formula really means (in simple words):</strong></p>
+                <p>It calculates the chance of 'x' events happening, based on the average rate 'lambda' (λ). 'e' is just a special math number (approx 2.718).</p>
+                
+                <div class="mnemonic-box">
+                    <h4>🧠 Mnemonic to Remember</h4>
+                    <p><strong>"Lambda is the Average"</strong></p>
+                    <ul class="params-list">
+                        <li><strong>λ (Lambda)</strong>: The average number of events (The rate)</li>
+                        <li><strong>x</strong>: The specific number of events you are checking for</li>
+                        <li><strong>e</strong>: Euler's number (constant ~ 2.718)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Mind Map</h3>
+                <div class="mindmap">
+                    <div class="mm-center">Poisson</div>
+                    <div class="mm-branch mm-b1">Rare Events</div>
+                    <div class="mm-branch mm-b2">Fixed Interval</div>
+                    <div class="mm-branch mm-b3">Constant Rate</div>
+                    <div class="mm-branch mm-b4">Independent</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Interactive Graph 📊</h3>
+                <p>Change Lambda (λ) to see the shape shift!</p>
+                <div class="chart-container">
+                    <canvas id="poissonChart"></canvas>
+                </div>
+                <div class="controls">
+                    <label>Average Rate (λ): <span id="valLambda">5</span> <input type="range" id="paramLambda" min="1" max="20" step="0.5" value="5"></label>
+                </div>
+                <div id="poissonExplanation" class="graph-explanation">
+                    Change the parameter to see the explanation here.
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Solved Examples</h3>
+                
+                <div class="example">
+                    <h4>Example 1: The Call Center</h4>
+                    <p><strong>Question:</strong> A call center receives an average of 3 calls per minute. What is the probability of receiving exactly 5 calls in a minute?</p>
+                    
+                    <div class="solution">
+                        <p><strong>Step 1: Identify the parameters</strong></p>
+                        <ul>
+                            <li><strong>λ</strong> (Average rate) = 3 calls per minute</li>
+                            <li><strong>x</strong> (Specific number) = 5 calls</li>
+                        </ul>
+                        
+                        <p><strong>Step 2: Apply the Poisson formula</strong></p>
+                        <p>$$ P(X=5) = \\frac{e^{-3} \\times 3^5}{5!} $$</p>
+                        
+                        <p><strong>Step 3: Calculate each component</strong></p>
+                        <ul>
+                            <li><strong>e⁻³</strong> ≈ 0.0498 (using e ≈ 2.718)</li>
+                            <li><strong>3⁵</strong> = 3×3×3×3×3 = <strong>243</strong></li>
+                            <li><strong>5!</strong> = 5×4×3×2×1 = <strong>120</strong></li>
+                        </ul>
+                        
+                        <p><strong>Step 4: Calculate the probability</strong></p>
+                        <p>P(X=5) = (0.0498 × 243) / 120</p>
+                        <p>P(X=5) = 12.1014 / 120</p>
+                        <p>P(X=5) ≈ <strong>0.1008 or 10.08%</strong></p>
+                        
+                        <p><strong>Answer:</strong> There is approximately a <strong>10% chance</strong> of receiving exactly 5 calls in a minute.</p>
+                    </div>
+                </div>
+                
+                <div class="example">
+                    <h4>Example 2: Website Traffic</h4>
+                    <p><strong>Question:</strong> A website receives an average of 2 visitors per hour. What is the probability of getting exactly 0 visitors in an hour?</p>
+                    
+                    <div class="solution">
+                        <p><strong>Step 1: Identify the parameters</strong></p>
+                        <ul>
+                            <li><strong>λ</strong> = 2 visitors per hour</li>
+                            <li><strong>x</strong> = 0 visitors</li>
+                        </ul>
+                        
+                        <p><strong>Step 2: Apply the formula</strong></p>
+                        <p>$$ P(X=0) = \\frac{e^{-2} \\times 2^0}{0!} $$</p>
+                        
+                        <p><strong>Step 3: Calculate each component</strong></p>
+                        <ul>
+                            <li><strong>e⁻²</strong> ≈ 0.1353</li>
+                            <li><strong>2⁰</strong> = <strong>1</strong> (anything to the power of 0 is 1)</li>
+                            <li><strong>0!</strong> = <strong>1</strong> (by definition)</li>
+                        </ul>
+                        
+                        <p><strong>Step 4: Calculate the probability</strong></p>
+                        <p>P(X=0) = (0.1353 × 1) / 1</p>
+                        <p>P(X=0) ≈ <strong>0.1353 or 13.53%</strong></p>
+                        
+                        <p><strong>Answer:</strong> There is approximately a <strong>13.5% chance</strong> of getting zero visitors in an hour.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card quiz-section">
+                <h3>Poisson Quiz</h3>
+                <div id="quiz-poisson"></div>
+            </div>
+        </section>
+
+        <!-- Combined Quiz Section -->
+        <section id="quizzes">
+            <div class="section-header">
+                <h2>Practice Makes Perfect</h2>
+                <p>Test your knowledge with mixed questions!</p>
+            </div>
+            <div class="card quiz-section">
+                <h3>Mixed Quiz 1</h3>
+                <div id="quiz-mixed1"></div>
+            </div>
+            <div class="card quiz-section">
+                <h3>Mixed Quiz 2</h3>
+                <div id="quiz-mixed2"></div>
+            </div>
+            <div class="card quiz-section">
+                <h3>Mixed Quiz 3</h3>
+                <div id="quiz-mixed3"></div>
+            </div>
+        </section>
+
+        <!-- Final Tricky Section -->
+        <section id="tricky" class="tricky-section">
+            <div class="card">
+                <h2>Before you leave the topic, here are the five random questions from the topic:</h2>
+                <div class="tricky-questions">
+                    <div class="question-item">
+                        <p class="q-text">1. Why does the Hypergeometric distribution converge to the Binomial distribution as N approaches infinity, and what is the specific condition for this approximation to be valid?</p>
+                        <p class="answer"><strong>Answer:</strong> As N → ∞, the ratio K/N approaches a constant probability 'p'. Since the population is so large, removing items doesn't significantly change the probability of success for the next trial. Thus, "sampling without replacement" effectively becomes "sampling with replacement." The approximation is generally valid when the sample size n is less than 5% of the population N (n/N < 0.05).</p>
+                    </div>
+                    <div class="question-item">
+                        <p class="q-text">2. If you sum two independent Poisson variables X ~ Poisson(λ1) and Y ~ Poisson(λ2), what is the distribution of Z = X + Y? Explain why.</p>
+                        <p class="answer"><strong>Answer:</strong> Z follows a Poisson distribution with parameter λ = λ1 + λ2. This is because Poisson counts events in an interval. If you count events in two independent intervals (or types), the total count is just the sum of the averages. This is known as the "Reproductive Property" of the Poisson distribution.</p>
+                    </div>
+                    <div class="question-item">
+                        <p class="q-text">3. In a Hypergeometric distribution, what happens to the variance if the sample size n is equal to the population size N? Explain the logic.</p>
+                        <p class="answer"><strong>Answer:</strong> The variance becomes 0. If n = N, you are sampling the entire population. Therefore, you will always get exactly K successes (because you took everything). Since the outcome is certain (constant), there is no variability, so Variance = 0. This is mathematically shown by the finite population correction factor (N-n)/(N-1), which becomes 0 when n=N.</p>
+                    </div>
+                    <div class="question-item">
+                        <p class="q-text">4. Can the mean of a Poisson distribution ever be less than its standard deviation? If so, when?</p>
+                        <p class="answer"><strong>Answer:</strong> Yes. For Poisson, Mean = λ and Variance = λ. The Standard Deviation is √λ. We want to know if Mean < Std Dev, i.e., λ < √λ. This inequality holds true when 0 < λ < 1. So, if the average rate of events is very small (less than 1), the mean is smaller than the standard deviation.</p>
+                    </div>
+                    <div class="question-item">
+                        <p class="q-text">5. Why is the Poisson distribution often derived as a limit of the Binomial distribution? What are the two simultaneous conditions required?</p>
+                        <p class="answer"><strong>Answer:</strong> Poisson is the limit of Binomial when we have many trials but a very low probability of success. The conditions are: (1) n → ∞ (number of trials becomes very large) and (2) p → 0 (probability of success becomes very small), such that n × p remains constant (λ). This models "rare events" in a continuum.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section id="conclusion" class="card">
+            <h2>🎉 You Made It!</h2>
+            <p>You've learned two fundamental concepts in statistics.</p>
+            <ul class="summary-list">
+                <li><strong>Hypergeometric:</strong> Sampling without replacement (Dependent events).</li>
+                <li><strong>Poisson:</strong> Counting rare events over time/space (Independent events).</li>
+            </ul>
+            <p class="motivation">"Statistics is the grammar of science." Keep practicing, and you'll ace your exam! 🚀</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Created for First-Year Statistics Students</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>`;
+
+fs.writeFileSync('index.html', htmlContent);
+console.log('index.html rebuilt successfully!');
